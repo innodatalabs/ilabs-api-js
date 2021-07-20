@@ -1,12 +1,15 @@
 const fetch = require('node-fetch');
 
-console.log( fetch )
 
 function sleep(millis) {
     return new Promise( resolve => setTimeout( resolve, millis ) );
 }
 
+/**
+ * CLinet to access InnodataLabs prediction microservices.
+ */
 class Client {
+
     constructor({userKey, endpoint='https://ilabs-api.innodata.com/v1', userAgent='@innodatalabs/ilabs-api'}) {
         this.endpoint = endpoint;
         this._authHeaders = {
@@ -34,12 +37,25 @@ class Client {
         return response;
     }
 
+    /**
+     * Checks is endpoint is accessible. Does not require userKey.
+     * @returns { ping: "pong" }
+     */
     async ping() {
         const response = await fetch(`${this.endpoint}/ping`);
         const result = await response.json();
         return result;
     }
 
+    /**
+     * Upload content to the document store.
+     *
+     * Content need to be in the document store in order to use prediction services on it.
+     *
+     * @param {*} content - content to send. Could be a string, a FileStream open for reading, or Buffer
+     *
+     * @returns remote file name
+     */
     async upload(content) {
         const response = await this._fetch(`${this.endpoint}/documents/input`, {
             method: 'POST',
@@ -53,6 +69,12 @@ class Client {
         return result.input_filename;
     }
 
+    /**
+     * Downloads the preocessed file from remote document store.
+     *
+     * @param {String} name - remote file name
+     * @returns Buffer object with the content.
+     */
     async download(name) {
         const response = await this._fetch(`${this.endpoint}/documents/output/${name}`);
         const body = await response.buffer();
@@ -60,6 +82,14 @@ class Client {
         return body;
     }
 
+    /**
+     * Kicks off the prediction job.
+     *
+     * @param {String} domain - prediction domain
+     * @param {String} name - remote file name
+     * @param {Object} params - (optional) query parameters for the microservice
+     * @returns {String} - task id.
+     */
     async predict(domain, name, params) {
         let url = `${this.endpoint}/reference/${domain}/${name}`;
         if (params) {
@@ -71,16 +101,34 @@ class Client {
         return result.task_id;
     }
 
+    /**
+     * Retrieves the status of a task.
+     *
+     * @param {String} domain - prediction domain
+     * @param {String} task_id - task id
+     * @returns {Object} - status object. Watch for status.completed and status.error.
+     */
     async status(domain, task_id) {
         const response = await this._fetch(`${this.endpoint}/reference/${domain}/${task_id}/status`);
         const result = await response.json();
         return result;
     }
 
+    /**
+     * Cancels a task
+     * @param {String} domain - prediction domain
+     * @param {String} task_id - task id
+     */
     async cancel(domain, task_id) {
         await this._fetch(`${this.endpoint}/reference/${domain}/${task_id}/cancel`);
     }
 
+    /**
+     * Blocks asynchronously until task is completed.
+     *
+     * @param {String} domain - prediction domain
+     * @param {String} task_id - task id
+     */
     async waitForCompletion(domain, task_id) {
         let result = {};
         try {
@@ -104,6 +152,15 @@ class Client {
         }
     }
 
+    /**
+     * Runs prediction.
+     *
+     * @param {String} domain - prediction domain
+     * @param {String} content - content to process
+     * @param {Object} params - (optional) prediction parameters
+     *
+     * @returns processed content
+     */
     async call(domain, content, params) {
 
         const name = await this.upload(content);
