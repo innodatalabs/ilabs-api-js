@@ -6,7 +6,7 @@ function sleep(millis) {
 }
 
 /**
- * CLinet to access InnodataLabs prediction microservices.
+ * Client to access InnodataLabs prediction microservices.
  */
 class Client {
 
@@ -38,7 +38,7 @@ class Client {
     }
 
     /**
-     * Checks is endpoint is accessible. Does not require userKey.
+     * Check if endpoint is accessible. Does not require userKey.
      * @returns { ping: "pong" }
      */
     async ping() {
@@ -70,7 +70,7 @@ class Client {
     }
 
     /**
-     * Downloads the preocessed file from remote document store.
+     * Download processed file from the remote document store.
      *
      * @param {String} name - remote file name
      * @returns Buffer object with the content.
@@ -83,7 +83,7 @@ class Client {
     }
 
     /**
-     * Kicks off the prediction job.
+     * Kick off the prediction job.
      *
      * @param {String} domain - prediction domain
      * @param {String} name - remote file name
@@ -102,7 +102,7 @@ class Client {
     }
 
     /**
-     * Retrieves the status of a task.
+     * Retrieve the status of a task.
      *
      * @param {String} domain - prediction domain
      * @param {String} task_id - task id
@@ -115,7 +115,7 @@ class Client {
     }
 
     /**
-     * Cancels a task
+     * Cancel a task
      * @param {String} domain - prediction domain
      * @param {String} task_id - task id
      */
@@ -124,7 +124,7 @@ class Client {
     }
 
     /**
-     * Blocks asynchronously until task is completed.
+     * Block asynchronously until task is completed.
      *
      * @param {String} domain - prediction domain
      * @param {String} task_id - task id
@@ -153,7 +153,7 @@ class Client {
     }
 
     /**
-     * Runs prediction.
+     * Run prediction.
      *
      * @param {String} domain - prediction domain
      * @param {String} content - content to process
